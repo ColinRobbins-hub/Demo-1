@@ -2,7 +2,6 @@
 
 const dom = {
   form: document.getElementById('setup-form'),
-  apiKey: document.getElementById('apiKey'),
   ticker: document.getElementById('ticker'),
   startBtn: document.getElementById('start-btn'),
   loading: document.getElementById('loading'),
@@ -24,7 +23,7 @@ const dom = {
  */
 const state = {
   symbol: null,
-  apiKey: null,
+  apiKey: 'LIZPJZ6KREG867EN',
   data: [], // ascending by date: [{ date: Date, dateStr: 'YYYY-MM-DD', close: number }]
   chart: null,
   currentIndex: null, // index in data of the current (hidden) reference day
@@ -36,7 +35,6 @@ function setLoading(isLoading) {
   dom.loading.hidden = !isLoading;
   dom.startBtn.disabled = isLoading;
   dom.ticker.disabled = isLoading;
-  dom.apiKey.disabled = isLoading;
 }
 
 function showError(message) {
@@ -271,19 +269,14 @@ dom.form.addEventListener('submit', async (e) => {
   clearError();
   resetUI();
   const symbolRaw = dom.ticker.value.trim();
-  const apiKeyRaw = dom.apiKey.value.trim();
   if (!symbolRaw) {
     showError('Please enter a stock ticker.');
     return;
   }
-  if (!apiKeyRaw) {
-    showError('Please enter your Alpha Vantage API key.');
-    return;
-  }
   setLoading(true);
   try {
-    const entries = await fetchTimeSeriesDailyAdjusted(symbolRaw, apiKeyRaw);
-    startGameWithData(symbolRaw, apiKeyRaw, entries);
+    const entries = await fetchTimeSeriesDailyAdjusted(symbolRaw, state.apiKey);
+    startGameWithData(symbolRaw, state.apiKey, entries);
   } catch (err) {
     console.error(err);
     showError(err.message || 'Failed to load data.');

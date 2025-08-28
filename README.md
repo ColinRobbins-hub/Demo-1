@@ -12,7 +12,7 @@ Guess whether a stock's adjusted close price will go up or down each trading day
 
 ## Local Development
 
-Open `index.html` in a browser. Enter your Alpha Vantage API key and any valid ticker (e.g., `MSFT`, `COF`).
+Open `index.html` in a browser. Enter any valid ticker (e.g., `MSFT`, `COF`). The Alpha Vantage API key is embedded in the app.
 
 Alpha Vantage Free tier limits apply (typically 5 requests/minute, 100/day). This app makes one request per game start, so it stays within limits.
 
@@ -26,7 +26,7 @@ Alpha Vantage Free tier limits apply (typically 5 requests/minute, 100/day). Thi
    - Branch: `main` and folder `/ (root)`
 5. Click Save. Your site will be available at the Pages URL shown.
 
-When the site is live, open it and paste your Alpha Vantage API key in the field provided, then start a game.
+When the site is live, open it and start a game. No API key entry is required.
 
 ## How It Works
 
