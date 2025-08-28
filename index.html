@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Market Prediction Game</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script src="./app.js" defer></script>
+    <meta name="description" content="Guess if the stock price will go up or down. Built with Alpha Vantage and Chart.js.">
+    <meta name="color-scheme" content="light dark">
+</head>
+<body>
+    <header class="container">
+        <h1>Stock Market Prediction Game</h1>
+        <p class="subtitle">Powered by Alpha Vantage real market data</p>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <form id="setup-form" class="setup-form">
+                <div class="field-group">
+                    <label for="apiKey">Alpha Vantage API Key</label>
+                    <input id="apiKey" name="apiKey" type="text" required placeholder="API KEY FROM STEP 4" value="API KEY FROM STEP 4" autocomplete="off" />
+                </div>
+                <div class="field-group">
+                    <label for="ticker">Stock Ticker Symbol</label>
+                    <input id="ticker" name="ticker" type="text" required placeholder="e.g., MSFT, COF" minlength="1" maxlength="10" pattern="[A-Za-z\.\-]{1,10}" autocomplete="off" />
+                </div>
+                <button id="start-btn" type="submit" class="primary">Start Game</button>
+                <span id="loading" class="loading" aria-live="polite" hidden>Loading data…</span>
+            </form>
+            <div id="error" class="error" role="alert" hidden></div>
+        </section>
+
+        <section class="grid">
+            <div class="card">
+                <div class="status-bar">
+                    <div><strong>Ticker:</strong> <span id="status-ticker">—</span></div>
+                    <div><strong>Current date:</strong> <span id="current-date">—</span></div>
+                    <div><strong>Score:</strong> <span id="score">0</span></div>
+                </div>
+                <canvas id="chart" height="160"></canvas>
+            </div>
+            <div class="card">
+                <div class="controls">
+                    <p id="instruction">Enter a ticker and press Start Game.</p>
+                    <div class="buttons">
+                        <button id="guess-up" class="success" disabled>Guess Up</button>
+                        <button id="guess-down" class="danger" disabled>Guess Down</button>
+                    </div>
+                    <div class="secondary-buttons">
+                        <button id="end-game" class="secondary" disabled>End Game</button>
+                        <button id="reset" class="secondary" disabled>Reset</button>
+                    </div>
+                    <div id="feedback" class="feedback" aria-live="polite"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="container footer">
+        <small>Data provided by Alpha Vantage. Subject to API limits.</small>
+    </footer>
+</body>
+</html>
+
