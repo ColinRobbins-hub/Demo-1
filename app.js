@@ -165,23 +165,68 @@ function resetUI() {
 }
 
 async function fetchTimeSeriesDailyAdjusted(symbol, apiKey) {
-  const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${encodeURIComponent(symbol)}&apikey=${encodeURIComponent(apiKey)}&outputsize=compact`;
-  const res = await fetch(url);
+  // First try Daily Adjusted
+  const urlAdjusted = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${encodeURIComponent(symbol)}&apikey=${encodeURIComponent(apiKey)}&outputsize=compact&datatype=json`;
+  let res = await fetch(urlAdjusted);
   if (!res.ok) {
     throw new Error(`Network error: ${res.status} ${res.statusText}`);
   }
-  const json = await res.json();
+  let json = await res.json();
   if (json['Error Message']) {
     throw new Error('Invalid ticker symbol. Please try a different one.');
   }
   if (json['Note']) {
     throw new Error('API rate limit reached. Please wait and try again.');
   }
-  const entries = parseTimeSeries(json);
-  if (!entries.length) {
-    throw new Error('No price data available for this ticker.');
+  if (json['Information']) {
+    throw new Error(json['Information']);
   }
-  return entries;
+  let entries = parseTimeSeries(json);
+  if (entries.length) {
+    return entries;
+  }
+
+  // Fallback: try non-adjusted Daily in case adjusted is unavailable for some reason
+  const urlDaily = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${encodeURIComponent(symbol)}&apikey=${encodeURIComponent(apiKey)}&outputsize=compact&datatype=json`;
+  res = await fetch(urlDaily);
+  if (!res.ok) {
+    throw new Error(`Network error: ${res.status} ${res.statusText}`);
+  }
+  json = await res.json();
+  if (json['Error Message']) {
+    throw new Error('Invalid ticker symbol. Please try a different one.');
+  }
+  if (json['Note']) {
+    throw new Error('API rate limit reached. Please wait and try again.');
+  }
+  if (json['Information']) {
+    throw new Error(json['Information']);
+  }
+  entries = parseTimeSeries(json);
+  if (entries.length) {
+    return entries;
+  }
+
+  // As a final step, validate if the symbol exists to give a clearer error
+  const exists = await symbolExists(symbol, apiKey);
+  if (!exists) {
+    throw new Error('Invalid ticker symbol. Please try a different one.');
+  }
+  console.debug('Alpha Vantage response without time series for symbol:', symbol, json);
+  throw new Error('No price data available right now. Try again in a minute or use another ticker.');
+}
+
+async function symbolExists(symbol, apiKey) {
+  const url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${encodeURIComponent(symbol)}&apikey=${encodeURIComponent(apiKey)}&datatype=json`;
+  const res = await fetch(url);
+  if (!res.ok) return false;
+  const json = await res.json();
+  if (json['Note'] || json['Information']) {
+    return true; // rate limited; assume it might exist
+  }
+  const matches = Array.isArray(json['bestMatches']) ? json['bestMatches'] : [];
+  const target = symbol.trim().toUpperCase();
+  return matches.some(m => (m['1. symbol'] || '').toUpperCase() === target);
 }
 
 function startGameWithData(symbol, apiKey, entries) {
